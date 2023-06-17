@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,10 +33,16 @@ public class Camerafollower : MonoBehaviour
         while (true)
         {
             yield return new WaitForEndOfFrame();
-            if (!objectsToFollow[1].GetComponent<Rigidbody>().IsSleeping())
+            var rb = objectsToFollow[1].GetComponent<Rigidbody>();
+            if (!rb.IsSleeping() && rb.isKinematic == false)
             {
                 ChangeObject();
-            }    
+            }
+
+            if (rb == null)
+            {
+                ChangeObject();
+            }
         }
         
     }
@@ -53,7 +58,7 @@ public class Camerafollower : MonoBehaviour
     {
         var destination = new Vector3(objectsToFollow.First().transform.position.x,
             objectsToFollow.First().transform.position.y + 10, transform.position.z);
-        transform.position = Vector3.Lerp(transform.position, destination, 0.1f);
+        transform.position = Vector3.Slerp(transform.position, destination, 0.1f);
     }
 
     public void ChangeObject(Transform transform)
@@ -62,4 +67,14 @@ public class Camerafollower : MonoBehaviour
         objectsToFollow.RemoveAt(0);
     }
 
+    public void AddObject(Transform transform)
+    {
+        objectsToFollow.Insert(1,transform.gameObject);
+        objectsToFollow.RemoveAt(0);
+    }
+    
+    public void RemoveObject(Transform transform)
+    {
+        objectsToFollow.Remove(transform.gameObject);
+    }
 }
