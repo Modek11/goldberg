@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ public class Camerafollower : MonoBehaviour
 {
     [SerializeField] private List<GameObject> objectsToFollow;
     private CinemachineVirtualCamera cVirtualCamera;
+    private float fovAtStart = 40;
     public static Camerafollower Instance { get; private set; }
     
     
@@ -23,6 +25,7 @@ public class Camerafollower : MonoBehaviour
             Instance = this; 
         }
 
+        fovAtStart = GetComponent<Camera>().fieldOfView;
         StartCoroutine(Kurtyna());
     }
 
@@ -48,7 +51,7 @@ public class Camerafollower : MonoBehaviour
     }
 
 
-    private void ChangeObject()
+    public void ChangeObject()
     {
         //cVirtualCamera.Follow = objectsToFollow.First().transform;
         objectsToFollow.RemoveAt(0);
@@ -56,9 +59,20 @@ public class Camerafollower : MonoBehaviour
 
     private void LateUpdate()
     {
-        var destination = new Vector3(objectsToFollow.First().transform.position.x,
-            objectsToFollow.First().transform.position.y + 10, transform.position.z);
-        transform.position = Vector3.Slerp(transform.position, destination, 0.1f);
+        Vector3 destination;
+        if (objectsToFollow[0].name == "Can_drink(Clone)")
+        {
+            destination = new Vector3(objectsToFollow.First().transform.position.x,
+                objectsToFollow.First().transform.position.y + 3.5f, transform.position.z);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(10,0,0), 0.1f);
+        }
+        else
+        {
+            destination = new Vector3(objectsToFollow.First().transform.position.x,
+                objectsToFollow.First().transform.position.y + 12, transform.position.z);
+        }
+        
+        transform.position = Vector3.Slerp(transform.position, destination, 0.15f);
     }
 
     public void ChangeObject(Transform transform)
@@ -77,4 +91,37 @@ public class Camerafollower : MonoBehaviour
     {
         objectsToFollow.Remove(transform.gameObject);
     }
+
+    public void BringCloser(float number)
+    {
+        StartCoroutine(BringCloser2(number));
+    }
+
+    private IEnumerator BringCloser2(float number)
+    {
+        var camera = GetComponent<Camera>();
+        
+        while(Math.Abs(camera.fieldOfView - number) > 0.01f)
+        {
+            camera.fieldOfView = Mathf.SmoothStep(camera.fieldOfView, number, 0.1f);
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    public void GetBackWider()
+    {
+        StartCoroutine(GetBackWider2());
+    }
+
+    private IEnumerator GetBackWider2()
+    {
+        var camera = GetComponent<Camera>();
+        
+        while(Math.Abs(camera.fieldOfView - fovAtStart) > 0.01f)
+        {
+            camera.fieldOfView = Mathf.SmoothStep(camera.fieldOfView, fovAtStart, 0.2f);
+            yield return new WaitForFixedUpdate();
+        }
+    }
+    
 }

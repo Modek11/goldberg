@@ -1,8 +1,11 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TriggerBoomEnd : MonoBehaviour
 {
+    [SerializeField] private GameObject fire;
+    [Space]
     [SerializeField] private float power;
     private float radius = 10000;
     
@@ -37,6 +40,10 @@ public class TriggerBoomEnd : MonoBehaviour
             if (rb != null)
                 rb.AddExplosionForce(power, explosionPos, radius, 3.0F);
         }
+        
+        var firee = Instantiate(fire,transform.position,transform.rotation);
+        
+        Camerafollower.Instance.ChangeObject();
 
         yield return null;
     }
